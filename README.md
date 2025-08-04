@@ -15,3 +15,86 @@ This tool enables calculation of non-synonymous (dN) and synonymous (dS) nucleot
 ## Contact
 Author: Changyue Yu cyu299@wisc.edu
 GitHub: yuchangyue1209
+
+## Input Files
+1. --sync
+A PoPoolation2-style .sync file containing allele counts per population.
+Format:
+chr  pos  ref  pop1_counts  pop2_counts  ...
+Example base count format: 0:0:10:5:0:0 (A:T:C:G:N:del)
+2. --gtf
+Gene annotation file (GTF) with CDS features, e.g.:
+chrI	BED	CDS	878338	879334	.	-	0	gene_id "cox7a1";
+chrII	BED	CDS	4892361	4895354	.	-	0	gene_id "cox5a";
+
+Must include:
+
+Chromosome
+
+Feature type = CDS
+
+Start & end positions
+
+Strand (+ or -)
+
+Gene ID in the attribute field
+
+3. --fasta
+Reference genome in FASTA format, including all chromosomes present in the .sync file and GTF annotations.
+
+## Usage
+git clone
+
+python run.py \
+  --sync path/to/your.sync \
+  --gtf path/to/your.gtf \
+  --fasta path/to/reference.fa \
+  --output output/results.tsv \
+  --pop-index 0 \
+  --min-coverage 10 \
+  --min-freq 0.1
+
+## Parameters
+  | Argument         | Description                                     |
+| ---------------- | ----------------------------------------------- |
+| `--sync`         | Path to `.sync` file                            |
+| `--gtf`          | Path to gene annotation file (GTF format)       |
+| `--fasta`        | Reference genome FASTA file                     |
+| `--output`       | Path to output `.tsv` file                      |
+| `--pop-index`    | Index of population in sync (default: `0`)      |
+| `--min-coverage` | Minimum coverage per site (default: `10`)       |
+| `--min-freq`     | Minimum minor allele frequency (default: `0.1`) |
+
+## Output Format
+
+| Column         | Description                                 |
+| -------------- | ------------------------------------------- |
+| `piN`          | Nucleotide diversity at nonsynonymous sites |
+| `piS`          | Nucleotide diversity at synonymous sites    |
+| `dN/dS`        | Ratio of πN / πS                            |
+| `nonsyn_sites` | Number of nonsynonymous sites               |
+| `syn_sites`    | Number of synonymous sites                  |
+
+## Project Structure
+Pool_dnds/
+├── run.py
+├── poolseq_dn_ds/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── parser/
+│   │   ├── __init__.py
+│   │   ├── sync_parser.py
+│   │   └── gtf_parser.py
+│   ├── reference/
+│   │   ├── __init__.py
+│   │   └── fasta_loader.py
+│   ├── annotation/
+│   │   ├── __init__.py
+│   │   └── codon_classifier.py
+│   └── estimator/
+│       ├── __init__.py
+│       └── dn_ds_calculator.py
+├── .gitignore
+├── README.md
+└── requirements.txt
+
