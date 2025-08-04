@@ -39,10 +39,10 @@ Reference genome in FASTA format, including all chromosomes present in the .sync
 
 ## Usage
 python run.py \
-  --sync path/to/your.sync \
-  --gtf path/to/your.gtf \
-  --fasta path/to/reference.fa \
-  --output output/results.tsv \
+  --sync /path/to/your.sync \
+  --gtf /path/to/your.gtf \
+  --fasta /path/to/reference.fa \
+  --output /path/to/output_dnds.tsv \
   --pop-index 0 \
   --min-coverage 10 \
   --min-freq 0.1
