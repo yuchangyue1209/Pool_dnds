@@ -14,6 +14,7 @@ def run():
     parser.add_argument("--output", required=True, help="Output file for dN/dS results")
     parser.add_argument("--pop-index", type=int, default=0, help="Population index in sync (0-based)")
     parser.add_argument("--min-coverage", type=int, default=10, help="Minimum coverage threshold")
+    parser.add_argument("--min-freq", type=float, default=0.1, help="Minimum minor allele frequency to include variant")
     args = parser.parse_args()
 
     print("✅ Loading reference genome...")
@@ -28,7 +29,7 @@ def run():
         for line in f:
             try:
                 parsed = parse_sync_line(line, args.pop_index, min_coverage=args.min_coverage)
-            except Exception as e:
+            except Exception:
                 continue  # skip malformed lines
 
             if not parsed:
@@ -41,7 +42,7 @@ def run():
             alt_base = parsed["minor"]
             alt_freq = parsed["minor_freq"]
 
-            if alt_freq < 0.1:
+            if alt_freq < args.min_freq:
                 continue  # skip low-frequency variants
 
             for cds in cds_regions:
@@ -89,4 +90,3 @@ def run():
         out.write(f"{result['piN']:.5f}\t{result['piS']:.5f}\t{result['dN/dS']:.5f}\t{result['nonsyn_sites']}\t{result['syn_sites']}\n")
 
     return 0
-
