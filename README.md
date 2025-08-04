@@ -57,24 +57,7 @@ Reference genome in FASTA format, including all chromosomes present in the `.syn
 
 ---
 
-## Usage
-
-### ✅ Example Usage
-
-```bash
-python run.py \
-  --sync /path/to/your.sync \
-  --gtf /path/to/your.gtf \
-  --fasta /path/to/reference.fa \
-  --output /path/to/output_dnds.tsv \
-  --pop-index 0 \
-  --min-coverage 10 \
-  --min-freq 0.1
-
----
-
-
-## Parameters
+### Parameters
 
 | Argument         | Description                                      |
 | ---------------- | ------------------------------------------------ |
@@ -95,5 +78,22 @@ python run.py \
 | `dN/dS`        | Ratio of πN / πS                             |
 | `nonsyn_sites` | Number of nonsynonymous sites                |
 | `syn_sites`    | Number of synonymous sites                   |
+
+
+## Usage
+
+### ✅ Example Usage
+
+```bash
+python run.py \
+  --sync /path/to/your.sync \
+  --gtf /path/to/your.gtf \
+  --fasta /path/to/reference.fa \
+  --output /path/to/output_dnds.tsv \
+  --pop-index 0 \
+  --min-coverage 10 \
+  --min-freq 0.1
+
+---
 
 
