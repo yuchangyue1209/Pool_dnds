@@ -38,6 +38,9 @@ Gene ID in the attribute field
 Reference genome in FASTA format, including all chromosomes present in the .sync file and GTF annotations.
 
 ## Usage
+### ✅ Example Usage
+
+```bash
 python run.py \
   --sync /path/to/your.sync \
   --gtf /path/to/your.gtf \
@@ -46,6 +49,7 @@ python run.py \
   --pop-index 0 \
   --min-coverage 10 \
   --min-freq 0.1
+
 
 ## Parameters
   | Argument         | Description                                     |
