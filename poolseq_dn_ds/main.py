@@ -1,5 +1,3 @@
-# poolseq_dn_ds/main.py
-
 import argparse
 from poolseq_dn_ds.parser.sync_parser import parse_sync_line
 from poolseq_dn_ds.parser.gtf_parser import parse_gtf
@@ -14,6 +12,8 @@ def run():
     parser.add_argument("--gtf", required=True, help="Path to GTF file")
     parser.add_argument("--fasta", required=True, help="Reference FASTA file")
     parser.add_argument("--output", required=True, help="Output file for dN/dS results")
+    parser.add_argument("--pop-index", type=int, default=0, help="Population index in sync (0-based)")
+    parser.add_argument("--min-coverage", type=int, default=10, help="Minimum coverage threshold")
     args = parser.parse_args()
 
     print("✅ Loading reference genome...")
@@ -22,37 +22,51 @@ def run():
     print("✅ Parsing GTF annotation...")
     cds_regions = parse_gtf(args.gtf)
 
-    print("✅ Reading sync file...")
+    print("✅ Reading sync file and classifying variants...")
     variants = []
     with open(args.sync) as f:
         for line in f:
-            chrom, pos, ref_base, pop_freqs = parse_sync_line(line)
-            if not pop_freqs or pop_freqs[0] is None:
+            try:
+                parsed = parse_sync_line(line, args.pop_index, min_coverage=args.min_coverage)
+            except Exception as e:
+                continue  # skip malformed lines
+
+            if not parsed:
                 continue
 
-            freq_vec = pop_freqs[0]  # first population only for now
-            bases = ['A', 'T', 'C', 'G']
-            alt_bases = [b for b, f in zip(bases, freq_vec) if b != ref_base and f > 0.1]
-            if not alt_bases:
-                continue
-            alt_base = alt_bases[0]
+            chrom = parsed["chrom"]
+            pos = parsed["pos"]
+            ref_base = parsed["ref"]
+            freqs = parsed["freqs"]
+            alt_base = parsed["minor"]
+            alt_freq = parsed["minor_freq"]
+
+            if alt_freq < 0.1:
+                continue  # skip low-frequency variants
 
             for cds in cds_regions:
                 if chrom == cds["chrom"] and cds["start"] <= pos <= cds["end"]:
                     gene = cds["gene"]
                     strand = cds["strand"]
+
+                    # Find codon start based on strand
                     cds_offset = pos - cds["start"]
                     codon_index = cds_offset // 3
                     codon_start = cds["start"] + codon_index * 3
                     ref_codon = ref_seqs[chrom][codon_start: codon_start + 3]
 
+                    if len(ref_codon) != 3 or "N" in ref_codon:
+                        continue
+
                     if strand == "-":
                         ref_codon = str(Seq(ref_codon).reverse_complement())
 
+                    # Mutate codon
                     codon_pos = (pos - codon_start) if strand == "+" else (2 - (pos - codon_start))
+                    if not 0 <= codon_pos < 3:
+                        continue
                     alt_codon = list(ref_codon)
-                    if 0 <= codon_pos < 3:
-                        alt_codon[codon_pos] = alt_base
+                    alt_codon[codon_pos] = alt_base
                     alt_codon = ''.join(alt_codon)
 
                     if strand == "-":
@@ -62,9 +76,9 @@ def run():
                     if change_type == "unknown":
                         continue
 
-                    pi = 2 * freq_vec[bases.index(alt_base)] * freq_vec[bases.index(ref_base)]
+                    pi = 2 * freqs[ref_base] * freqs[alt_base]
                     variants.append({"type": change_type, "pi": pi, "gene": gene})
-                    break
+                    break  # only assign one CDS
 
     print("✅ Calculating dN/dS...")
     result = estimate_dn_ds(variants)
@@ -75,3 +89,4 @@ def run():
         out.write(f"{result['piN']:.5f}\t{result['piS']:.5f}\t{result['dN/dS']:.5f}\t{result['nonsyn_sites']}\t{result['syn_sites']}\n")
 
     return 0
+
