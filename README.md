@@ -1,15 +1,17 @@
 # Pool_dnds
-Developed for pooled data dN/dS calculation 
-Estimate dN/dS ratios from Pool-Seq data using SNP frequencies and gene annotations.
 
-## Structure
+Estimate **dN/dS** from Pool-Seq data using `.sync` files, GTF annotations, and reference FASTA sequences.
 
-- `parser/`: sync and GTF parsers
-- `annotation/`: classify codon changes (syn/nonsyn)
-- `reference/`: load reference genome
-- `estimator/`: compute dN/dS from SNP-level π values
+This tool enables calculation of non-synonymous (dN) and synonymous (dS) nucleotide diversity from pooled population sequencing data using codon-aware comparisons within annotated coding regions.
 
-## Usage
+---
 
-```bash
-python main.py --sync your.sync --gtf genes.gtf --fasta genome.fa
+## Requirements
+
+- Python 3.8+
+- Biopython
+- pandas
+
+## Contact
+Author: Changyue Yu cyu299@wisc.edu
+GitHub: yuchangyue1209
